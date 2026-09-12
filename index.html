@@ -427,7 +427,7 @@ function quiz(group,fb,after){
    f.textContent=ok?'✓ أحسنتِ. إجابة صحيحة مع تفسير المفهوم.':'✗ ليست الإجابة الصحيحة. راجعي الفكرة المرتبطة بالسؤال ثم أعيدي المحاولة.';
    if(ok && after) document.getElementById(after).disabled=false;
    if(!ok) setTimeout(()=>buttons.forEach(x=>x.disabled=false),650);
- });
+ }));
 }
 quiz('[data-quiz="diag"]','diagfb','diagNext');
 quiz('[data-quiz="q4"]','q4fb','q4Next');
