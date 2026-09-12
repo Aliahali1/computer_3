@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>حقيبة الطالبة المتغيبة | إنشاء قواعد البيانات</title>
+<style>
+:root{
+ --bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#dbe2ea;
+ --accent:#2563eb;--accent2:#0f766e;--soft:#eaf1ff;--ok:#15803d;--bad:#b42318;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.75}
+button,input{font:inherit}
+.app{max-width:1180px;margin:auto;padding:18px}
+.top{background:linear-gradient(135deg,#fff,#eef4ff);border:1px solid var(--line);border-radius:24px;padding:24px;margin-bottom:14px}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;background:var(--soft);color:var(--accent);font-size:12px;font-weight:800}
+h1{margin:5px 0;font-size:30px}h2{margin:0 0 8px;font-size:24px}h3{margin:0 0 8px;font-size:19px}
+.muted{color:var(--muted)}
+.progress{height:9px;background:#e8edf3;border-radius:99px;overflow:hidden;margin-top:15px}
+.progress i{display:block;width:7%;height:100%;background:var(--accent);transition:.3s}
+.progressrow{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:245px 1fr;gap:14px}
+.side{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px;height:max-content;position:sticky;top:12px}
+.navbtn{width:100%;border:1px solid transparent;background:transparent;text-align:right;padding:10px 12px;border-radius:11px;cursor:pointer;color:var(--ink)}
+.navbtn:hover{background:#f3f6fa}.navbtn.active{background:var(--soft);border-color:#bfd1ff;font-weight:800;color:var(--accent)}
+.main{min-width:0}
+.screen{display:none;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;min-height:550px}
+.screen.active{display:block}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.card{background:#f8fafc;border:1px solid var(--line);border-radius:16px;padding:17px}
+.card strong{display:block;margin-bottom:5px}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+.btn{border:0;border-radius:12px;padding:11px 17px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer}
+.btn.secondary{background:#eef2f6;color:var(--ink)}.btn.green{background:var(--accent2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.question{margin-top:18px;border:1px solid var(--line);border-radius:16px;padding:17px;background:#f8fafc}
+.choices{display:grid;gap:9px;margin-top:12px}
+.choice{border:1px solid var(--line);background:#fff;padding:12px 14px;border-radius:11px;text-align:right;cursor:pointer}
+.choice:hover{border-color:var(--accent)}
+.feedback{display:none;margin-top:12px;padding:12px;border-radius:11px}.feedback.show{display:block}.ok{background:#edf8f0;color:#176b34}.bad{background:#fff0ed;color:#9b241b}
+.lesson-map{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+.node{padding:14px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:center}
+.node b{display:block}.node small{color:var(--muted)}
+.table{width:100%;border-collapse:collapse;margin-top:14px;background:#fff}.table th,.table td{border:1px solid var(--line);padding:9px;text-align:right}.table th{background:#eef4ff}
+.pill{display:inline-block;padding:4px 9px;background:#eef2f6;border-radius:999px;font-size:12px;margin:2px}
+.sim{margin-top:16px;border:1px solid #cfd8e3;border-radius:18px;overflow:hidden;background:#eef1f5}
+.simbar{background:#26364a;color:#fff;padding:10px 14px;display:flex;gap:12px;align-items:center}
+.simbody{display:grid;grid-template-columns:180px 1fr;min-height:300px}
+.simnav{background:#f7f8fa;border-left:1px solid #d5dbe3;padding:10px}.simnav button{display:block;width:100%;border:0;background:transparent;padding:10px;text-align:right;border-radius:8px;cursor:pointer}.simnav button:hover{background:#e7edf4}
+.simwork{padding:16px;background:#fff}.simtab{display:none}.simtab.active{display:block}
+.dbbox{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.dbcard{border:1px solid var(--line);border-radius:14px;padding:13px;background:#fbfcfe;cursor:pointer}.dbcard.selected{outline:3px solid #c9d9ff}
+.threeD{margin-top:18px;perspective:900px;display:flex;justify-content:center}
+.cube{width:250px;height:170px;position:relative;transform:rotateX(12deg) rotateY(-12deg);transform-style:preserve-3d;transition:.3s}
+.face{position:absolute;width:250px;height:170px;border:2px solid #93b4ef;background:#edf4ff;border-radius:14px;padding:18px;box-shadow:0 12px 30px #b9c8dd66}
+.face.front{transform:translateZ(65px)}.face.back{transform:rotateY(180deg) translateZ(65px)}
+.face.right{transform:rotateY(90deg) translateZ(65px)}.face.left{transform:rotateY(-90deg) translateZ(65px)}
+.face.top{transform:rotateX(90deg) translateZ(65px)}.face.bottom{transform:rotateX(-90deg) translateZ(65px)}
+.cube:hover{transform:rotateX(20deg) rotateY(-28deg)}
+.schema{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.schemaCard{background:#fff;border:2px solid #9fb4d5;border-radius:14px;padding:12px;min-width:170px;box-shadow:0 7px 18px #0000000b}
+.line{font-weight:800;color:var(--accent)}
+.fieldrow{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;margin-top:8px}.fieldrow input,.fieldrow select{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px}
+.sortcards{display:grid;gap:8px}.sortcard{padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer}.sortcard.drag{background:#eef4ff}
+.result{margin-top:10px;font-weight:800}
+.rubric{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}
+.rubric div{padding:13px;border:1px solid var(--line);border-radius:12px;background:#fafbfc}
+.score{font-size:28px;font-weight:900;color:var(--accent)}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.side{position:static}.cards,.lesson-map,.rubric{grid-template-columns:1fr 1fr}.simbody{grid-template-columns:1fr}.simnav{display:flex;gap:5px;overflow:auto;border-left:0;border-bottom:1px solid #d5dbe3}.simnav button{white-space:nowrap}.fieldrow{grid-template-columns:1fr}}
+@media(max-width:520px){h1{font-size:24px}.screen{padding:17px}.cards,.lesson-map,.rubric{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+<span class="badge">LEA • حقيبة الطالبة المتغيبة</span>
+<h1>🏫 إنشاء قواعد البيانات</h1>
+<p class="muted">رحلة تعلم تفاعلية: تتعلمين المفاهيم، تحاكين بناء قاعدة بيانات مدرسة صغيرة، ثم تطبقين وتثبتين الإتقان.</p>
+<div class="progressrow"><span id="stage">البداية</span><span id="pct">7%</span></div>
+<div class="progress"><i id="bar"></i></div>
+</header>
+
+<div class="layout">
+<aside class="side">
+<button class="navbtn active" data-go="s1">١. ابدئي هنا</button>
+<button class="navbtn" data-go="s2">٢. التهيئة والتشخيص</button>
+<button class="navbtn" data-go="s3">٣. خريطة التعلم</button>
+<button class="navbtn" data-go="s4">٤. المفاهيم الأساسية</button>
+<button class="navbtn" data-go="s5">٥. مراحل بناء القاعدة</button>
+<button class="navbtn" data-go="s6">٦. التقييم المرحلي ١</button>
+<button class="navbtn" data-go="s7">٧. مختبر Access</button>
+<button class="navbtn" data-go="s8">٨. بناء الجداول</button>
+<button class="navbtn" data-go="s9">٩. المفاتيح والعلاقات</button>
+<button class="navbtn" data-go="s10">١٠. التقييم المرحلي ٢</button>
+<button class="navbtn" data-go="s11">١١. النماذج</button>
+<button class="navbtn" data-go="s12">١٢. مشروع المدرسة</button>
+<button class="navbtn" data-go="s13">١٣. اختبار الإتقان</button>
+<button class="navbtn" data-go="s14">١٤. العلاج والإثراء</button>
+<button class="navbtn" data-go="s15">١٥. مهمة التعويض</button>
+</aside>
+
+<main class="main">
+
+<section class="screen active" id="s1">
+<span class="badge">بوابة الدرس</span>
+<h2>مرحبًا بكِ يا مصممة قواعد البيانات 👩🏻‍💻</h2>
+<p>ستعملين اليوم على مشروع واحد مستمر: <b>تصميم قاعدة بيانات لمدرسة صغيرة</b>.</p>
+<div class="cards">
+<div class="card"><strong>🎯 ماذا ستتعلمين؟</strong><span class="muted">المفاهيم، الجداول، الحقول، أنواع البيانات، الخصائص، المفاتيح، العلاقات والنماذج.</span></div>
+<div class="card"><strong>🏫 ماذا ستبنين؟</strong><span class="muted">قاعدة بيانات تضم جداول المعلمات والطالبات والمواد والدرجات.</span></div>
+</div>
+<div class="actions"><button class="btn" data-next="s2">ابدئي رحلة التعلم</button></div>
+</section>
+
+<section class="screen" id="s2">
+<span class="badge">التهيئة + التشخيص</span>
+<h2>هل تستطيع المدرسة إدارة آلاف البيانات بسهولة؟</h2>
+<p class="muted">تخيلي أن المدرسة لديها بيانات معلمات وطالبات ومواد ودرجات. كيف يمكن تنظيمها بطريقة تقلل التكرار وتسهّل الوصول إلى المعلومات؟</p>
+<div class="question">
+<strong>تشخيص قبلي</strong>
+<p>أي خيار يعبّر أفضل عن الهدف من قاعدة البيانات؟</p>
+<div class="choices" data-quiz="diag">
+<button class="choice" data-correct="false">حفظ البيانات في ملفات متفرقة فقط</button>
+<button class="choice" data-correct="true">تنظيم البيانات بطريقة تسهّل إدارتها والوصول إليها</button>
+<button class="choice" data-correct="false">زيادة عدد الأوراق المستخدمة في المدرسة</button>
+</div>
+<div class="feedback" id="diagfb"></div>
+</div>
+<div class="actions"><button class="btn" id="diagNext" disabled data-next="s3">انتقلي إلى خريطة التعلم</button></div>
+</section>
+
+<section class="screen" id="s3">
+<span class="badge">خريطة الرحلة</span>
+<h2>رحلتك في بناء قاعدة بيانات المدرسة</h2>
+<div class="lesson-map">
+<div class="node"><b>🧠 أفهم</b><small>قاعدة البيانات ومكوناتها</small></div>
+<div class="node"><b>🧩 أصمم</b><small>المراحل والجداول والحقول</small></div>
+<div class="node"><b>🧪 أحاكي</b><small>بناء قاعدة البيانات</small></div>
+<div class="node"><b>🔗 أربط</b><small>المفاتيح والعلاقات</small></div>
+<div class="node"><b>📝 أتحقق</b><small>تقويم مرحلي</small></div>
+<div class="node"><b>🏫 أطبق</b><small>مشروع المدرسة</small></div>
+<div class="node"><b>🎯 أتقن</b><small>اختبار الإتقان</small></div>
+<div class="node"><b>📤 أثبت</b><small>مهمة التعويض</small></div>
+</div>
+<div class="question">
+<strong>قاعدة الرحلة</strong>
+<p>الخطأ ليس نهاية التعلم. عند الخطأ ستحصلين على شرح علاجي ثم فرصة جديدة للتحقق من الفهم.</p>
+</div>
+<div class="actions"><button class="btn" data-next="s4">ابدئي المفاهيم الأساسية</button></div>
+</section>
+
+<section class="screen" id="s4">
+<span class="badge">المحوران ١ و٢</span>
+<h2>قاعدة البيانات: من البيانات إلى التنظيم</h2>
+<p>قاعدة البيانات مجموعة بيانات منظمة ومترابطة. أما نظام إدارة قواعد البيانات فهو البرنامج الذي يساعد على إنشاء قواعد البيانات وإدارتها والتعامل معها.</p>
+<div class="cards">
+<div class="card"><strong>📋 الجدول</strong><span class="muted">مجموعة منظمة من السجلات حول موضوع محدد.</span></div>
+<div class="card"><strong>▤ السجل</strong><span class="muted">صف يمثل مجموعة بيانات مرتبطة بكيان واحد.</span></div>
+<div class="card"><strong>🏷️ الحقل</strong><span class="muted">عمود يمثل نوعًا محددًا من البيانات.</span></div>
+<div class="card"><strong>🗂️ مثال</strong><span class="muted">في جدول الطالبات: رقم الطالبة والاسم والصف والفصل حقول، وكل طالبة تمثل سجلًا.</span></div>
+</div>
+<table class="table">
+<tr><th>رقم الطالبة</th><th>الاسم</th><th>الصف</th><th>الفصل</th></tr>
+<tr><td>1001</td><td>سارة</td><td>ثالث</td><td>1</td></tr>
+<tr><td>1002</td><td>نورة</td><td>ثالث</td><td>2</td></tr>
+<tr><td>1003</td><td>ريم</td><td>ثالث</td><td>1</td></tr>
+</table>
+<div class="question">
+<strong>تحققي من فهمك</strong>
+<p>في الجدول السابق، ماذا يمثل الصف الذي يحتوي على بيانات سارة؟</p>
+<div class="choices" data-quiz="q4">
+<button class="choice" data-correct="false">حقل</button>
+<button class="choice" data-correct="true">سجل</button>
+<button class="choice" data-correct="false">قاعدة بيانات كاملة</button>
+</div>
+<div class="feedback" id="q4fb"></div>
+</div>
+<div class="actions"><button class="btn" id="q4Next" disabled data-next="s5">المحور التالي</button></div>
+</section>
+
+<section class="screen" id="s5">
+<span class="badge">المحور ٣</span>
+<h2>مراحل بناء قاعدة البيانات</h2>
+<p class="muted">رتبي المراحل قبل أن تبدأي بناء قاعدة بيانات المدرسة.</p>
+<div class="sortcards" id="sortList">
+<div class="sortcard" draggable="true" data-order="1">١. تحديد المتطلبات</div>
+<div class="sortcard" draggable="true" data-order="2">٢. تحليل المتطلبات</div>
+<div class="sortcard" draggable="true" data-order="3">٣. تصميم قاعدة البيانات</div>
+<div class="sortcard" draggable="true" data-order="4">٤. إنشاء قاعدة البيانات</div>
+<div class="sortcard" draggable="true" data-order="5">٥. اختبار قاعدة البيانات</div>
+<div class="sortcard" draggable="true" data-order="6">٦. صيانة قاعدة البيانات</div>
+</div>
+<p class="muted">يمكنك الضغط على البطاقات بالترتيب الصحيح بدل السحب إذا كان الجهاز لا يدعم السحب.</p>
+<div class="actions"><button class="btn" id="checkOrder">تحققي من الترتيب</button></div>
+<div class="result" id="orderResult"></div>
+<div class="actions"><button class="btn" id="orderNext" disabled data-next="s6">التقييم المرحلي ١</button></div>
+</section>
+
+<section class="screen" id="s6">
+<span class="badge">التقييم المرحلي ١</span>
+<h2>تحققي من فهمك قبل دخول المختبر</h2>
+<div class="question">
+<p><b>السؤال ١:</b> في أي مرحلة يتم تحويل المتطلبات إلى تصميم للجداول والحقول والعلاقات؟</p>
+<div class="choices q6a">
+<button class="choice" data-correct="false">الصيانة</button>
+<button class="choice" data-correct="true">تصميم قاعدة البيانات</button>
+<button class="choice" data-correct="false">اختبار قاعدة البيانات</button>
+</div>
+<div class="feedback" id="q6afb"></div>
+</div>
+<div class="question">
+<p><b>السؤال ٢:</b> لماذا نحتاج إلى اختبار قاعدة البيانات؟</p>
+<div class="choices q6b">
+<button class="choice" data-correct="true">للتأكد من أن قاعدة البيانات تعمل وتحقق المتطلبات بصورة صحيحة</button>
+<button class="choice" data-correct="false">لتغيير اسم المدرسة فقط</button>
+<button class="choice" data-correct="false">لإلغاء جميع الجداول</button>
+</div>
+<div class="feedback" id="q6bfb"></div>
+</div>
+<div class="actions"><button class="btn" id="s6Next" disabled data-next="s7">دخول مختبر Access</button></div>
+</section>
+
+<section class="screen" id="s7">
+<span class="badge">🧪 مختبر المحاكاة ١</span>
+<h2>أنشئي قاعدة بيانات المدرسة</h2>
+<p class="muted">هذه محاكاة تعليمية لواجهة Access وليست نسخة من البرنامج الحقيقي. نفذي الخطوات هنا قبل التطبيق في البرنامج الفعلي.</p>
+<div class="sim">
+<div class="simbar"><b>Access — محاكاة تعليمية</b><span id="simStatus">قاعدة البيانات غير منشأة</span></div>
+<div class="simbody">
+<div class="simnav">
+<button data-sim="home">Home</button><button data-sim="tables">Tables</button><button data-sim="design">Design View</button><button data-sim="relationships">Relationships</button><button data-sim="forms">Forms</button>
+</div>
+<div class="simwork">
+<div class="simtab active" id="simhome">
+<h3>إنشاء قاعدة بيانات جديدة</h3>
+<p>ابدئي بقاعدة بيانات فارغة.</p>
+<button class="btn" id="createDb">New → Blank Database</button>
+<div class="question"><strong>اسم قاعدة البيانات</strong><div class="actions"><input id="dbName" placeholder="مدرستي" style="padding:10px;border:1px solid var(--line);border-radius:9px;flex:1;min-width:180px"><button class="btn" id="saveDb">Create</button></div><div class="feedback" id="dbfb"></div></div>
+</div>
+<div class="simtab" id="simtables">
+<h3>الجداول</h3>
+<div class="dbbox">
+<div class="dbcard" data-table="teachers"><b>👩‍🏫 المعلمات</b><small>رقم المعلمة • الاسم • التخصص</small></div>
+<div class="dbcard" data-table="students"><b>👩‍🎓 الطالبات</b><small>رقم الطالبة • الاسم • الصف • الفصل</small></div>
+<div class="dbcard" data-table="subjects"><b>📚 المواد</b><small>رقم المادة • اسم المادة</small></div>
+<div class="dbcard" data-table="grades"><b>📊 الدرجات</b><small>رقم الطالبة • رقم المادة • الدرجة</small></div>
+</div>
+<div class="threeD">
+<div class="cube">
+<div class="face front"><b>قاعدة البيانات</b><p>مدرستي</p><span class="pill">Tables</span><span class="pill">Relationships</span><span class="pill">Forms</span></div>
+<div class="face back">الجداول تنظم البيانات.</div><div class="face right">الحقول تصف البيانات.</div><div class="face left">السجلات تمثل الحالات.</div><div class="face top">المفاتيح تربط البيانات.</div><div class="face bottom">النماذج تسهّل الإدخال.</div>
+</div></div>
+<p class="muted" id="tableHint">اختاري جدولًا لاستكشافه.</p>
+</div>
+<div class="simtab" id="simdesign">
+<h3>Design View — تصميم الحقول</h3>
+<p>تدربي على تحديد اسم الحقل ونوع البيانات والمفتاح الأساسي.</p>
+<div class="fieldrow"><input value="رقم الطالبة" readonly><select><option>Number</option><option>Short Text</option><option>Date/Time</option></select><select><option>Primary Key</option><option>Normal Field</option></select></div>
+<div class="fieldrow"><input value="الاسم" readonly><select><option>Short Text</option><option>Number</option></select><select><option>Normal Field</option><option>Primary Key</option></select></div>
+<div class="fieldrow"><input value="الصف" readonly><select><option>Short Text</option><option>Number</option></select><select><option>Normal Field</option><option>Primary Key</option></select></div>
+<div class="question"><strong>تحدي سريع</strong><p>ما الحقل الأنسب ليكون مفتاحًا أساسيًا في جدول الطالبات؟</p><div class="choices" id="pkChoices"><button class="choice" data-correct="false">الاسم</button><button class="choice" data-correct="true">رقم الطالبة</button><button class="choice" data-correct="false">الصف</button></div><div class="feedback" id="pkfb"></div></div>
+</div>
+<div class="simtab" id="simrelationships">
+<h3>Relationships — ربط الجداول</h3>
+<p>شاهدي كيف يصبح جدول الدرجات حلقة وصل بين الطالبات والمواد في السيناريو التعليمي.</p>
+<div class="schema">
+<div class="schemaCard"><b>الطالبات</b><br><span class="line">رقم الطالبة 🔑</span><br>الاسم<br>الصف</div>
+<div class="line">1 ───────── ∞</div>
+<div class="schemaCard"><b>الدرجات</b><br><span class="line">رقم الطالبة 🔗</span><br><span class="line">رقم المادة 🔗</span><br>الدرجة</div>
+<div class="line">∞ ───────── 1</div>
+<div class="schemaCard"><b>المواد</b><br><span class="line">رقم المادة 🔑</span><br>اسم المادة</div>
+</div>
+<div class="question"><strong>تحدي العلاقة</strong><p>أي نوع علاقة يظهر في كل جانب من الرسم أعلاه؟</p><div class="choices" id="relChoices"><button class="choice" data-correct="true">واحد إلى متعدد</button><button class="choice" data-correct="false">واحد إلى واحد</button><button class="choice" data-correct="false">لا توجد علاقة</button></div><div class="feedback" id="relfb"></div></div>
+</div>
+<div class="simtab" id="simforms">
+<h3>Forms — النماذج</h3>
+<p>النموذج يساعد على إدخال البيانات وعرضها بطريقة أسهل للمستخدم.</p>
+<button class="btn green" id="openForm">فتح نموذج الطالبات</button>
+<div id="formDemo" style="display:none;margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:15px">
+<b>نموذج بيانات طالبة</b>
+<div class="fieldrow"><input placeholder="رقم الطالبة"><input placeholder="الاسم"><input placeholder="الصف"></div>
+<button class="btn" style="margin-top:10px">حفظ السجل</button>
+</div>
+</div>
+</div></div>
+</div>
+<div class="actions"><button class="btn" data-next="s8">الانتقال إلى بناء الجداول</button></div>
+</section>
+
+<section class="screen" id="s8">
+<span class="badge">المحاور ٤ و٥</span>
+<h2>ابني جداول المدرسة</h2>
+<p class="muted">اختاري الحقول المناسبة لكل جدول، ثم راجعي نوع البيانات والخصائص قبل اعتماد التصميم.</p>
+<table class="table">
+<tr><th>الجدول</th><th>حقول أساسية مقترحة</th><th>مفتاح أساسي</th></tr>
+<tr><td>المعلمات</td><td>رقم المعلمة، الاسم، التخصص</td><td>رقم المعلمة</td></tr>
+<tr><td>الطالبات</td><td>رقم الطالبة، الاسم، الصف، الفصل</td><td>رقم الطالبة</td></tr>
+<tr><td>المواد</td><td>رقم المادة، اسم المادة</td><td>رقم المادة</td></tr>
+<tr><td>الدرجات</td><td>رقم الطالبة، رقم المادة، الدرجة</td><td>يُحدد وفق تصميم السجل المعتمد</td></tr>
+</table>
+<div class="question"><strong>موقف تصميمي</strong><p>أي نوع بيانات يناسب حقل "الاسم" غالبًا؟</p><div class="choices" id="typeChoices"><button class="choice" data-correct="false">Number</button><button class="choice" data-correct="true">Short Text</button><button class="choice" data-correct="false">Date/Time</button></div><div class="feedback" id="typefb"></div></div>
+<div class="actions"><button class="btn" id="s8Next" disabled data-next="s9">المفاتيح والعلاقات</button></div>
+</section>
+
+<section class="screen" id="s9">
+<span class="badge">المحور ٦</span>
+<h2>المفاتيح والعلاقات: اجعلي الجداول تتحدث معًا 🔗</h2>
+<div class="cards">
+<div class="card"><strong>🔑 المفتاح الأساسي</strong><span class="muted">حقل يميز كل سجل بصورة فريدة.</span></div>
+<div class="card"><strong>🔗 المفتاح الأجنبي</strong><span class="muted">حقل يستخدم للإشارة إلى مفتاح أساسي في جدول آخر عند بناء العلاقة.</span></div>
+</div>
+<div class="threeD"><div class="cube">
+<div class="face front"><b>الطالبات</b><p>🔑 رقم الطالبة</p></div>
+<div class="face right"><b>الدرجات</b><p>🔗 رقم الطالبة</p><p>🔗 رقم المادة</p></div>
+<div class="face left"><b>المواد</b><p>🔑 رقم المادة</p></div>
+<div class="face top"><b>العلاقات</b><p>تنظم الترابط بين الجداول.</p></div>
+<div class="face back">التصميم الجيد يقلل التكرار.</div><div class="face bottom">تحققي من المفاتيح.</div>
+</div></div>
+<div class="actions"><button class="btn" data-next="s10">اختبري فهم المفاتيح</button></div>
+</section>
+
+<section class="screen" id="s10">
+<span class="badge">التقييم المرحلي ٢</span>
+<h2>تحدي المفاتيح والعلاقات</h2>
+<div class="question"><p><b>السؤال ١:</b> لماذا يكون "رقم الطالبة" مناسبًا كمفتاح أساسي؟</p><div class="choices q10a"><button class="choice" data-correct="true">لأنه يميز السجل بصورة فريدة</button><button class="choice" data-correct="false">لأنه اسم الطالبة</button><button class="choice" data-correct="false">لأنه يمثل الصف</button></div><div class="feedback" id="q10afb"></div></div>
+<div class="question"><p><b>السؤال ٢:</b> ما الفائدة الأساسية من العلاقات بين الجداول؟</p><div class="choices q10b"><button class="choice" data-correct="true">ربط البيانات ذات الصلة بين الجداول</button><button class="choice" data-correct="false">حذف جميع البيانات</button><button class="choice" data-correct="false">تحويل كل الحقول إلى نص</button></div><div class="feedback" id="q10bfb"></div></div>
+<div class="actions"><button class="btn" id="s10Next" disabled data-next="s11">تعلم النماذج</button></div>
+</section>
+
+<section class="screen" id="s11">
+<span class="badge">المحور ٧</span>
+<h2>النماذج Forms</h2>
+<p>النموذج واجهة تساعد المستخدم على إدخال البيانات أو عرضها بصورة منظمة وأسهل من التعامل المباشر مع الجدول في بعض الحالات.</p>
+<div class="cards">
+<div class="card"><strong>🎯 الهدف</strong><span class="muted">تسهيل إدخال البيانات وعرض السجلات.</span></div>
+<div class="card"><strong>🧪 محاكاة</strong><span class="muted">افتحي نموذج الطالبات في المختبر وتخيلي إدخال سجل جديد.</span></div>
+</div>
+<div class="question"><strong>تحققي من فهمك</strong><p>أي عنصر هو الأنسب لتسهيل إدخال بيانات طالبة؟</p><div class="choices" id="formChoices"><button class="choice" data-correct="true">نموذج إدخال بيانات</button><button class="choice" data-correct="false">حذف قاعدة البيانات</button><button class="choice" data-correct="false">إعادة تسمية الحقول عشوائيًا</button></div><div class="feedback" id="formfb"></div></div>
+<div class="actions"><button class="btn" id="s11Next" disabled data-next="s12">ابدئي مشروع المدرسة</button></div>
+</section>
+
+<section class="screen" id="s12">
+<span class="badge">🏫 المشروع التطبيقي</span>
+<h2>مهمتك: صممي قاعدة بيانات مدرسة صغيرة</h2>
+<p>أنتِ الآن مصممة قواعد بيانات. أمامك مدرسة صغيرة تريد تنظيم بيانات المعلمات والطالبات والمواد والدرجات.</p>
+<div class="rubric">
+<div>☐ تحديد الجداول المناسبة</div><div>☐ تحديد الحقول بوضوح</div>
+<div>☐ اختيار أنواع بيانات مناسبة</div><div>☐ تحديد المفاتيح الأساسية</div>
+<div>☐ تحديد المفاتيح الأجنبية عند الحاجة</div><div>☐ بناء العلاقات المناسبة</div>
+<div>☐ التفكير في النموذج المناسب للإدخال</div><div>☐ اختبار التصميم</div>
+</div>
+<div class="question"><strong>تحدي المصممة</strong><p>أي جدولين أساسيين يحتاجهما نظام الدرجات للارتباط بالطالبات والمواد في هذا السيناريو؟</p><div class="choices" id="projectChoices"><button class="choice" data-correct="true">الطالبات والمواد</button><button class="choice" data-correct="false">المعلمات فقط</button><button class="choice" data-correct="false">لا يحتاج أي جدول</button></div><div class="feedback" id="projectfb"></div></div>
+<div class="actions"><button class="btn" id="projectNext" disabled data-next="s13">اختبار الإتقان</button></div>
+</section>
+
+<section class="screen" id="s13">
+<span class="badge">🎯 اختبار الإتقان</span>
+<h2>أثبتي إتقانك</h2>
+<p class="muted">هذا نموذج تقويم مدمج. <b>قبل الاعتماد النهائي، استبدلي أسئلته بأسئلتك الأصلية التي أعددتها للدرس</b> إذا كانت مختلفة؛ لا ينبغي للنسخة البرمجية أن تستبدل تقويمك المعتمد.</p>
+<div id="finalQuiz"></div>
+<div class="actions"><button class="btn" id="gradeFinal">احسبي نتيجة الإتقان</button></div>
+<div id="finalResult" class="question" style="display:none"></div>
+<div class="actions"><button class="btn" id="masteryNext" disabled data-next="s14">عرض مسار التعلم</button></div>
+</section>
+
+<section class="screen" id="s14">
+<span class="badge">🔄 التفريد</span>
+<h2>مسارك يعتمد على نتيجتك</h2>
+<div class="cards">
+<div class="card"><strong>🟢 80% فأعلى + تحقق النواتج الأساسية</strong><span class="muted">تعتبرين متقنة، وتفتح لك المهمة التطبيقية والإثراء.</span></div>
+<div class="card"><strong>🟠 أقل من 80%</strong><span class="muted">راجعي النواتج التي تحتاج دعمًا فقط، ثم أعيدي سؤال تحقق جديد.</span></div>
+</div>
+<div class="question"><strong>مسار علاجي نموذجي</strong><p>إذا أخطأتِ في المفاتيح، عودي إلى الفرق بين المفتاح الأساسي والأجنبي، ثم طبقي على جدول الطالبات والدرجات، وبعدها أجيبي عن سؤال جديد.</p></div>
+<div class="question"><strong>مسار إثرائي</strong><p>صممي تصورًا لعلاقة إضافية بين بيانات المعلمات والمواد، ثم فسري لماذا اخترتِ هذه العلاقة.</p></div>
+<div class="actions"><button class="btn" data-next="s15">مهمة التعويض وإثبات التعلم</button></div>
+</section>
+
+<section class="screen" id="s15">
+<span class="badge">📤 حقيبة الطالبة المتغيبة</span>
+<h2>مهمة التعويض</h2>
+<p>أكملي رحلة التعلم، ثم نفذي المنتج المطلوب داخل البيئة المعتمدة في المدرسة، وأرسلي دليل الإنجاز في المكان المحدد داخل Teams.</p>
+<div class="cards">
+<div class="card"><strong>المطلوب</strong><span class="muted">تصميم/إنشاء قاعدة بيانات المدرسة وفق المتطلبات التي تحددها المعلمة.</span></div>
+<div class="card"><strong>دليل التعلم</strong><span class="muted">صورة أو ملف أو رابط للمنتج، وفق آلية التسليم المعتمدة.</span></div>
+</div>
+<div class="rubric">
+<div>☐ أكملت التعلم</div><div>☐ أكملت التقويم</div>
+<div>☐ عالجت الأخطاء عند الحاجة</div><div>☐ أنجزت التطبيق</div>
+<div>☐ رفعت دليل الإنجاز</div><div>☐ تحققت من معايير النجاح</div>
+</div>
+<div class="actions"><button class="btn green" id="completeBtn">✅ تسجيل إكمال الرحلة</button></div>
+<div id="completeMsg" class="feedback"></div>
+</section>
+
+</main>
+</div>
+<footer>نسخة أولية قابلة للتطوير — المحتوى التقويمي النهائي يجب مطابقته مع أسئلة المعلمة ومصادر المنهج قبل النشر.</footer>
+</div>
+
+<script>
+const screens=[...document.querySelectorAll('.screen')];
+const nav=[...document.querySelectorAll('.navbtn')];
+const stages={s1:['البداية',7],s2:['التهيئة والتشخيص',14],s3:['خريطة التعلم',20],s4:['المفاهيم',28],s5:['مراحل البناء',35],s6:['التقييم المرحلي ١',42],s7:['المحاكاة',50],s8:['الجداول والحقول',58],s9:['المفاتيح والعلاقات',65],s10:['التقييم المرحلي ٢',70],s11:['النماذج',76],s12:['المشروع',82],s13:['الإتقان',88],s14:['التفريد',94],s15:['الإكمال',100]};
+function go(id){
+ screens.forEach(s=>s.classList.toggle('active',s.id===id));
+ nav.forEach(b=>b.classList.toggle('active',b.dataset.go===id));
+ const [name,p]=stages[id]||['',7];
+ document.getElementById('stage').textContent=name;
+ document.getElementById('pct').textContent=p+'%';
+ document.getElementById('bar').style.width=p+'%';
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.next)));
+nav.forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+
+function quiz(group,fb,after){
+ const buttons=[...document.querySelectorAll(group+' .choice')];
+ buttons.forEach(btn=>btn.addEventListener('click',()=>{
+   buttons.forEach(x=>x.disabled=true);
+   const ok=btn.dataset.correct==='true';
+   const f=document.getElementById(fb);
+   f.className='feedback show '+(ok?'ok':'bad');
+   f.textContent=ok?'✓ أحسنتِ. إجابة صحيحة مع تفسير المفهوم.':'✗ ليست الإجابة الصحيحة. راجعي الفكرة المرتبطة بالسؤال ثم أعيدي المحاولة.';
+   if(ok && after) document.getElementById(after).disabled=false;
+   if(!ok) setTimeout(()=>buttons.forEach(x=>x.disabled=false),650);
+ });
+}
+quiz('[data-quiz="diag"]','diagfb','diagNext');
+quiz('[data-quiz="q4"]','q4fb','q4Next');
+quiz('.q6a','q6afb');
+quiz('.q6b','q6bfb');
+quiz('#pkChoices','pkfb');
+quiz('#relChoices','relfb');
+quiz('#typeChoices','typefb','s8Next');
+quiz('.q10a','q10afb');
+quiz('.q10b','q10bfb');
+quiz('#formChoices','formfb','s11Next');
+quiz('#projectChoices','projectfb','projectNext');
+
+let q6a=false,q6b=false,q10a=false,q10b=false;
+document.querySelectorAll('.q6a .choice').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.correct==='true'){q6a=true;checkS6()}}));
+document.querySelectorAll('.q6b .choice').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.correct==='true'){q6b=true;checkS6()}}));
+function checkS6(){if(q6a&&q6b)document.getElementById('s6Next').disabled=false}
+document.querySelectorAll('.q10a .choice').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.correct==='true'){q10a=true;checkS10()}}));
+document.querySelectorAll('.q10b .choice').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.correct==='true'){q10b=true;checkS10()}}));
+function checkS10(){if(q10a&&q10b)document.getElementById('s10Next').disabled=false}
+
+let orderClicks=[];
+document.querySelectorAll('#sortList .sortcard').forEach(card=>card.addEventListener('click',()=>{
+ orderClicks.push(card);card.classList.add('drag');
+ if(orderClicks.length===6){document.getElementById('orderResult').textContent='تم اختيار ست مراحل. اضغطي "تحققي من الترتيب".'}
+}));
+document.getElementById('checkOrder').addEventListener('click',()=>{
+ const vals=orderClicks.map(x=>Number(x.dataset.order));
+ const ok=vals.length===6 && vals.every((v,i)=>v===i+1);
+ const r=document.getElementById('orderResult');
+ r.textContent=ok?'✓ الترتيب صحيح. فهمتِ تسلسل بناء قاعدة البيانات.':'✗ الترتيب غير صحيح. أعيدي الاختيار بالترتيب من ١ إلى ٦.';
+ r.style.color=ok?'var(--ok)':'var(--bad)';
+ if(ok)document.getElementById('orderNext').disabled=false;
+});
+document.getElementById('sortList').addEventListener('dragstart',e=>{if(e.target.classList.contains('sortcard'))e.dataTransfer.setData('text/plain',e.target.dataset.order)});
+document.getElementById('sortList').addEventListener('dragover',e=>e.preventDefault());
+document.getElementById('sortList').addEventListener('drop',e=>{
+ e.preventDefault();const from=e.dataTransfer.getData('text/plain');const target=e.target.closest('.sortcard');if(!target)return;
+ const source=[...document.querySelectorAll('.sortcard')].find(x=>x.dataset.order===from);
+ if(source&&source!==target) target.parentNode.insertBefore(source,target);
+ orderClicks=[...document.querySelectorAll('.sortcard')];orderClicks.forEach(x=>x.classList.add('drag'));
+});
+
+document.querySelectorAll('[data-sim]').forEach(b=>b.addEventListener('click',()=>{
+ const id=b.dataset.sim;
+ document.querySelectorAll('.simtab').forEach(x=>x.classList.remove('active'));
+ document.getElementById('sim'+id).classList.add('active');
+}));
+let dbCreated=false;
+document.getElementById('createDb').addEventListener('click',()=>{document.getElementById('simStatus').textContent='تم اختيار Blank Database — اكتبي الاسم ثم Create';});
+document.getElementById('saveDb').addEventListener('click',()=>{
+ const name=document.getElementById('dbName').value.trim();
+ const f=document.getElementById('dbfb');
+ if(!name){f.className='feedback show bad';f.textContent='اكتبي اسم قاعدة البيانات أولًا.';return}
+ dbCreated=true;document.getElementById('simStatus').textContent='قاعدة البيانات: '+name;
+ f.className='feedback show ok';f.textContent='✓ تم إنشاء قاعدة البيانات في المحاكاة.';
+});
+document.querySelectorAll('.dbcard').forEach(c=>c.addEventListener('click',()=>{
+ document.querySelectorAll('.dbcard').forEach(x=>x.classList.remove('selected'));c.classList.add('selected');
+ const names={teachers:'جدول المعلمات: رقم المعلمة، الاسم، التخصص.',students:'جدول الطالبات: رقم الطالبة، الاسم، الصف، الفصل.',subjects:'جدول المواد: رقم المادة، اسم المادة.',grades:'جدول الدرجات: رقم الطالبة، رقم المادة، الدرجة.'};
+ document.getElementById('tableHint').textContent=names[c.dataset.table];
+}));
+document.getElementById('openForm').addEventListener('click',()=>document.getElementById('formDemo').style.display='block');
+
+const finalQuestions=[
+ {q:'أي عنصر يمثل عمودًا في الجدول؟',a:['السجل','الحقل','قاعدة البيانات','العلاقة'],c:1},
+ {q:'ما الهدف من المفتاح الأساسي؟',a:['تمييز السجل بصورة فريدة','تغيير لون الجدول','حذف البيانات','إنشاء نسخة من البرنامج'],c:0},
+ {q:'أي نوع بيانات يناسب الاسم؟',a:['Short Text','Number','Date/Time','Currency'],c:0},
+ {q:'ما الغرض من العلاقات بين الجداول؟',a:['ربط البيانات ذات الصلة','حذف الجداول','منع استخدام النماذج','تحويل النص إلى أرقام'],c:0},
+ {q:'أي خيار يمثل جدولًا في مشروع المدرسة؟',a:['الطالبات','زر Create','نوع البيانات','المفتاح فقط'],c:0},
+ {q:'النموذج يساعد على:',a:['إدخال وعرض البيانات بصورة منظمة','حذف قاعدة البيانات','إلغاء المفاتيح','تغيير نظام التشغيل'],c:0},
+ {q:'في علاقة واحد إلى متعدد، يمكن لسجل واحد في جدول أن يرتبط بـ:',a:['عدة سجلات في جدول آخر','لا شيء','سجل واحد فقط دائمًا','ملف نصي فقط'],c:0},
+ {q:'لماذا نختبر قاعدة البيانات؟',a:['للتأكد من صحة عملها وتحقيقها للمتطلبات','لإلغاء البيانات','لتغيير اسم الحقول عشوائيًا','لمنع المستخدمين'],c:0},
+ {q:'ما الذي يميز السجل؟',a:['يمثل مجموعة بيانات مرتبطة بكيان واحد','يمثل قاعدة البيانات كلها','يمثل نوع البيانات فقط','يمثل زرًا'],c:0},
+ {q:'ما الخطوة التي تسبق إنشاء قاعدة البيانات في التسلسل التعليمي؟',a:['تصميم قاعدة البيانات','الصيانة فقط','حذف الجداول','إغلاق البرنامج'],c:0}
+];
+const fq=document.getElementById('finalQuiz');
+finalQuestions.forEach((x,i)=>{
+ const d=document.createElement('div');d.className='question';
+ d.innerHTML='<p><b>'+ (i+1) +'.</b> '+x.q+'</p><div class="choices"></div><div class="feedback" id="ff'+i+'"></div>';
+ const cs=d.querySelector('.choices');
+ x.a.forEach((a,j)=>{const b=document.createElement('button');b.className='choice';b.textContent=a;b.dataset.j=j;cs.appendChild(b);});
+ cs.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
+   cs.querySelectorAll('.choice').forEach(z=>z.disabled=true);
+   const ok=Number(b.dataset.j)===x.c;const f=document.getElementById('ff'+i);
+   f.className='feedback show '+(ok?'ok':'bad');f.textContent=ok?'✓ صحيح':'✗ راجعي المفهوم المرتبط بالسؤال.';
+   d.dataset.answer=ok?'1':'0';
+ }));
+ fq.appendChild(d);
+});
+let finalScore=0;
+document.getElementById('gradeFinal').addEventListener('click',()=>{
+ const qs=[...fq.querySelectorAll('.question')];finalScore=qs.reduce((s,q)=>s+(q.dataset.answer==='1'?1:0),0);
+ const pct=Math.round(finalScore/finalQuestions.length*100);
+ const r=document.getElementById('finalResult');r.style.display='block';
+ r.innerHTML='<div class="score">'+pct+'%</div><p>أجبتِ إجابة صحيحة عن '+finalScore+' من '+finalQuestions.length+' أسئلة.</p><p>'+ (pct>=80?'🟢 مستوى إتقان مبدئي: انتقلي إلى التطبيق والإثراء، مع ضرورة التحقق من جميع النواتج الأساسية.':'🟠 لم يتحقق الإتقان بعد: عودي إلى النواتج التي تحتاج دعمًا ثم أعيدي التحقق.')+'</p>';
+ r.className='question '+(pct>=80?'ok':'bad');
+ document.getElementById('masteryNext').disabled=false;
+});
+document.getElementById('completeBtn').addEventListener('click',()=>{
+ const m=document.getElementById('completeMsg');m.className='feedback show ok';
+ m.textContent='✓ تم تسجيل إكمال الرحلة على هذه الصفحة. للتوثيق المدرسي الفعلي يجب أن يكون التسليم عبر الآلية المعتمدة في Teams.';
+});
+</script>
+</body>
+</html>
